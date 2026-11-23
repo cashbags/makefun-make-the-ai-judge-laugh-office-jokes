@@ -53,10 +53,13 @@ function abort(why: string): never {
 
 function writeJoke(): void {
   // Count Unicode code points, not UTF-16 code units and not bytes, because
-  // that is how the gate counts: [...JOKE] splits on code points.
-  const length = [...JOKE].length;
+  // that is how the gate counts: [...JOKE] splits on code points. Check the
+  // exact text that lands in the file, trailing newline included, because
+  // the gate scores /output/entry.txt itself, not the constant alone.
+  const written = JOKE + '\n';
+  const length = [...written].length;
   if (length < MIN_CODE_POINTS || length > MAX_CODE_POINTS) {
-    abort(`joke is ${length} code points, outside the 1–199 gate`);
+    abort(`entry text is ${length} code points, outside the 1–199 gate`);
   }
   if (JOKE.trim().length === 0) {
     abort('joke is only whitespace');
@@ -69,8 +72,8 @@ function writeJoke(): void {
   const to = join(outDir, 'entry.txt');
 
   mkdirSync(outDir, { recursive: true });
-  writeFileSync(to, JOKE + '\n', 'utf8');
-  console.log(`wrote ${to} (${length} code points)`);
+  writeFileSync(to, written, 'utf8');
+  console.log(`wrote ${to} (${[...JOKE].length} code points in the joke, ${length} with the newline)`);
 }
 
 writeJoke();
